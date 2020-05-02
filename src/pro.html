@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<!--
+	 Copyright (C) 2020  Cloud  https://www.txthinking.com
+
+	 Licensed under the Apache License, Version 2.0 (the "License");
+	 you may not use this file except in compliance with the License.
+	 You may obtain a copy of the License at
+
+	 http://www.apache.org/licenses/LICENSE-2.0
+
+	 Unless required by applicable law or agreed to in writing, software
+	 distributed under the License is distributed on an "AS IS" BASIS,
+	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	 See the License for the specific language governing permissions and
+	 limitations under the License.
+	-->
+	<head>
+		<meta charset="UTF-8">
+		<script type="text/javascript" src="weightless.min.js"></script>
+		<script type="text/javascript" src="client.js"></script>
+	</head>
+
+	<body style="background-color:#000000;">
+		<div style="width:100%;height:100vh;display:flex;flex-direction:column;justify-content:space-between;align-items:center;">
+			<div></div>
+			<div>
+				<div class="nocode nosignin">
+					<wl-textfield id="email" label="Email" style="--input-label-color:#ffffff;--input-color:#ffffff;"></wl-textfield>
+					<div style="display:flex;flex-direction:row;justify-content:center;padding-top:20px;">
+						<wl-button flat inverted outlined style="color:#ffffff;" id="getcode">Get Code</wl-button>
+					</div>
+				</div>
+				<div style="display:none;" class="yescode nosignin">
+					<wl-textfield id="code" label="Code" style="--input-label-color:#ffffff;--input-color:#ffffff;"></wl-textfield>
+					<div style="display:flex;flex-direction:row;justify-content:center;padding-top:20px;">
+						<wl-button flat inverted outlined style="color:#ffffff;" id="signin">Signin</wl-button>
+					</div>
+				</div>
+				<div style="display:none;" class="yessignin nopro">
+					<div style="display:flex;flex-direction:row;justify-content:center;padding-top:20px;">
+						<wl-button flat inverted outlined style="color:#ffffff;" id="pay">Pro $1/month</wl-button>
+					</div>
+				</div>
+				<div style="display:none;" class="yessignin yespro">
+					<div style="display:flex;flex-direction:row;justify-content:center;padding-top:20px;">
+						<wl-button flat inverted outlined style="color:#ffffff;">You are Pro</wl-button>
+					</div>
+				</div>
+			</div>
+			<div style="display:flex;flex-direction:row;justify-content:center;padding-bottom:20px;">
+				<div style="padding: 5px;"><a style="text-decoration:none;color:#eeeeee;" href="mailto:cloud@txthinking.com">Contact</a></div>
+				<div style="padding: 5px;"><a style="text-decoration:none;color:#eeeeee;" href="https://www.txthinking.com/terms.html">Terms</a></div>
+				<div style="padding: 5px;"><a style="text-decoration:none;color:#eeeeee;" href="https://www.txthinking.com/privacy.html">Privacy</a></div>
+			</div>
+			<wl-snackbar id="hi" fixed>
+				<span id="girl"></span>
+			</wl-snackbar>
+		</div>
+		<script type="text/javascript" src="pro.js"></script>
+	</body>
+
+</html>
+

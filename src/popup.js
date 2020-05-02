@@ -1,5 +1,6 @@
 /*
 Copyright (C) 2011  Paul Marks  http://www.pmarks.net/
+Copyright (C) 2020  Cloud  https://www.txthinking.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,10 +23,13 @@ if (!isFinite(tabId)) {
 const bg = chrome.extension.getBackgroundPage();
 let table = null;
 
-window.onload = function() {
-  table = document.getElementById("addr_table");
-  table.onmousedown = handleMouseDown;
-  bg.popups.attachWindow(window);
+window.onload = async function() {
+    const w = new Go();
+    var result = await WebAssembly.instantiateStreaming(fetch('data:application/wasm;base64,'+b), w.importObject);
+    w.run(result.instance);
+    table = document.getElementById("addr_table");
+    table.onmousedown = handleMouseDown;
+    bg.popups.attachWindow(window);
 };
 
 // Clear the table, and fill it with new data.
@@ -176,12 +180,53 @@ function makeRow(isFirst, tuple) {
     cacheTd.style.paddingLeft = '0';
   }
 
-  tr._domain = domain;
-  tr.appendChild(sslTd);
-  tr.appendChild(domainTd);
-  tr.appendChild(addrTd);
-  tr.appendChild(cacheTd);
-  return tr;
+    tr._domain = domain;
+    tr.appendChild(sslTd);
+    tr.appendChild(domainTd);
+    tr.appendChild(addrTd);
+    tr.appendChild(cacheTd);
+
+    const ctd = document.createElement("td");
+    var s = localStorage.getItem("token");
+    var s1 = localStorage.getItem("wtoken");
+    if(!s){
+        var a = document.createElement("a");
+        a.setAttribute("href", "/pro.html");
+        a.setAttribute("target", "_blank");
+        a.appendChild(document.createTextNode("Country [Pro Visible]"));
+        ctd.appendChild(a);
+    }
+    if (s){
+        if(!s1){
+            bg.wtoken();
+			var a = document.createElement("a");
+			a.setAttribute("href", "/pro.html");
+			a.setAttribute("target", "_blank");
+			a.appendChild(document.createTextNode("Country [Pro]"));
+			ctd.appendChild(a);
+        }
+        if(s1){
+            try{
+                var c = window.Country(s, s1, addr)
+                if(c == "Expired"){
+					var a = document.createElement("a");
+					a.setAttribute("href", "/pro.html");
+					a.setAttribute("target", "_blank");
+					a.appendChild(document.createTextNode("Country [Pro]"));
+					ctd.appendChild(a);
+                    bg.wtoken();
+                    c = "";
+                }
+                if(c != "Expired"){
+					ctd.appendChild(document.createTextNode(c));
+				}
+            }catch(e){
+				ctd.appendChild(document.createTextNode(e.message));
+            }
+        }
+    }
+    tr.appendChild(ctd);
+    return tr;
 }
 
 // Mac OS has an annoying feature where right-click selects the current

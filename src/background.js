@@ -1,5 +1,6 @@
 /*
 Copyright (C) 2011  Paul Marks  http://www.pmarks.net/
+Copyright (C) 2020  Cloud  https://www.txthinking.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,7 +42,7 @@ function newMap() {
 }
 
 // requestId -> {tabInfo, domain}
-const requestMap = newMap(); 
+const requestMap = newMap();
 
 // tabId -> TabInfo
 const tabMap = newMap();
@@ -859,3 +860,14 @@ for (const option of Object.keys(DEFAULT_OPTIONS)) {
   options[option] = DEFAULT_OPTIONS[option];
 }
 loadOptions(function() {});
+
+async function wtoken(){
+    try{
+        var r = await unary('AppService.GetIPToken', M('Token', {
+            token: localStorage.getItem("token"),
+        }));
+        localStorage.setItem("wtoken", r.token);
+    }catch(e){
+        localStorage.setItem("Error", e.message);
+    }
+}
