@@ -4,7 +4,7 @@ IPvBar is a Chrome extension that adds an icon to your location bar, indicating 
 
 ## Install it from the Chrome Web Store
 
-https://chrome.google.com/webstore/detail/ipvbar/copjmgogifdfjkaenpallapiidcpkjbm?utm_source=chrome-ntp-icon
+https://chrome.google.com/webstore/detail/ipvbar/copjmgogifdfjkaenpallapiidcpkjbm
 
 ## Screenshot
 
