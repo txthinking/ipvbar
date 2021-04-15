@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!--
+    <!--
 Copyright (C) 2011  Paul Marks  http://www.pmarks.net/
 Copyright (C) 2020  Cloud  https://www.txthinking.com
 
@@ -16,87 +16,86 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<head>
-<meta charset="UTF-8">
-<style type="text/css">
-body {
-  margin: 0;
-  font-family: serif;
-  font-size: medium;
-}
-table, td, tr {
-  border-width: 1px;
-  border-collapse: collapse;
-  border-color: #888;
-  border-style: solid;
-  padding: 0pt 3pt 0pt 3pt;
-  white-space: nowrap;
-}
-tr {
-  height: 21px;
-}
-.mainRow {
-  font-weight: bold;
-}
-.cacheCell {
-  border-left-width: 0;
-}
-.ipCell {
-  font-family: monospace;
-  border-right-width: 0;
-  color: #000080;
-  padding-right: 0;
-}
-.ip4 {
-  color: #800000;
-}
-.ip6 {
-  color: #008000;
-}
-.highlight {
-  background-color: #ffff90;
-}
-.border {
-  display: inline-block;
-  float: left;
-  padding: 6px;
-}
-#spill_count_container {
-  text-align: center;
-  font-weight: bold;
-  color: #888;
-}
+    <head>
+        <meta charset="UTF-8" />
+        <style type="text/css">
+            body {
+                margin: 0;
+                font-family: serif;
+                font-size: medium;
+            }
+            table,
+            td,
+            tr {
+                border-width: 1px;
+                border-collapse: collapse;
+                border-color: #888;
+                border-style: solid;
+                padding: 0pt 3pt 0pt 3pt;
+                white-space: nowrap;
+            }
+            tr {
+                height: 21px;
+            }
+            .mainRow {
+                font-weight: bold;
+            }
+            .cacheCell {
+                border-left-width: 0;
+            }
+            .ipCell {
+                font-family: monospace;
+                border-right-width: 0;
+                color: #000080;
+                padding-right: 0;
+            }
+            .ip4 {
+                color: #800000;
+            }
+            .ip6 {
+                color: #008000;
+            }
+            .highlight {
+                background-color: #ffff90;
+            }
+            .border {
+                display: inline-block;
+                float: left;
+                padding: 6px;
+            }
+            #spill_count_container {
+                text-align: center;
+                font-weight: bold;
+                color: #888;
+            }
 
-@keyframes shake {
-  from, to {
-    transform: translate3d(0, 0, 0);
-  }
-  20%, 60% {
-    transform: translate3d(5px, 0, 0);
-  }
-  40%, 80% {
-    transform: translate3d(-5px, 0, 0);
-  }
-}
-.shake {
-  animation-name: shake;
-  animation-duration: 500ms;
-}
-</style>
-<script type="text/javascript" src="b.js"></script>
-<script type="text/javascript" src="wasm_exec.js"></script>
-<script type="text/javascript" src="client.js"></script>
-<script type="text/javascript" src="common.js"></script>
-<script type="text/javascript" src="popup.js"></script>
-</head>
+            @keyframes shake {
+                from,
+                to {
+                    transform: translate3d(0, 0, 0);
+                }
+                20%,
+                60% {
+                    transform: translate3d(5px, 0, 0);
+                }
+                40%,
+                80% {
+                    transform: translate3d(-5px, 0, 0);
+                }
+            }
+            .shake {
+                animation-name: shake;
+                animation-duration: 500ms;
+            }
+        </style>
+        <script type="text/javascript" src="common.js"></script>
+        <script type="text/javascript" src="popup.js"></script>
+    </head>
 
-<body>
-<div class="border">
-  <table id="addr_table"></table>
-  <div id="spill_count_container">
-  &#x22ee; <span id="spill_count">0</span> requests omitted
-  </div>
-</div>
-</body>
-
+    <body>
+        <div class="border">
+            <table id="addr_table"></table>
+            <div id="spill_count_container">&#x22ee; <span id="spill_count">0</span> requests omitted</div>
+        </div>
+    </body>
 </html>

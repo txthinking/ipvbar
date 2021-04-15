@@ -1,31 +1,24 @@
 {
-  "name": "IPvBar",
-  "manifest_version": 2,
-  "version": "1.43",
-  "minimum_chrome_version": "26",
-  "description": "Display the server IP and country, with a realtime summary of IPv4, IPv6, and HTTPS information across all page elements.",
-  "homepage_url": "https://github.com/txthinking/ipvbar",
-  "icons": {
-    "16": "icon16.png",
-    "128": "icon128.png"
-  },
-  "background": {
-    "scripts": [ "common.js", "background.js", "client.js" ]
-  },
-  "page_action": {
-    "dummy": "http://crbug.com/86449"
-  },
-  "options_ui": {
-    "page": "options.html",
-    "chrome_style": true
-  },
-  "content_security_policy": "script-src 'self' 'unsafe-eval' 'wasm-eval'; object-src 'self'",
-  "permissions": [
-    "contextMenus",
-    "storage",
-    "tabs",
-    "webNavigation",
-    "webRequest",
-    "<all_urls>"
-  ]
+    "name": "IPvBar",
+    "manifest_version": 2,
+    "version": "2021.4.15",
+    "minimum_chrome_version": "26",
+    "description": "Display the server IP and country, with a realtime summary of IPv4, IPv6, and HTTPS information across all page elements.",
+    "homepage_url": "https://github.com/txthinking/ipvbar",
+    "icons": {
+        "16": "icon16.png",
+        "128": "icon128.png"
+    },
+    "background": {
+        "scripts": ["common.js", "wasm_exec.js", "client.js", "b.js", "background.js"]
+    },
+    "page_action": {
+        "dummy": "http://crbug.com/86449"
+    },
+    "options_ui": {
+        "page": "options.html",
+        "chrome_style": true
+    },
+    "content_security_policy": "script-src 'self' 'unsafe-eval' 'wasm-eval'; object-src 'self'",
+    "permissions": ["contextMenus", "storage", "tabs", "webNavigation", "webRequest", "<all_urls>"]
 }
